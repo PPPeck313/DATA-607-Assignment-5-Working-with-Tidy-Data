@@ -2,7 +2,10 @@
 The chart above describes August 2021 data for Israeli hospitalization (“Severe Cases”) rates for people under 50 (assume “50 and under”) and over 50, for both un-vaccinated and fully vaccinated populations. Analyze the data, and try to answer the questions posed in the spreadsheet. You’ll need some high level domain knowledge around:
 1. Israel’s total population
 2. Who is eligible to receive vaccinations
-3. What does it mean to be fully vaccinated?</p>
+3. What does it mean to be fully vaccinated?
+
+<!-- end of the list -->
+
 Please note any apparent discrepancies that you observe in your analysis.
 
 1. Create a .CSV file (or optionally, a relational database!) that includes all the information above. You’re encouraged to use a “wide” structure similar to how the information appears above, so that you can practice tidying and transformations as described below.
