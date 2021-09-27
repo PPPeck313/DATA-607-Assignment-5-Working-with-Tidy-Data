@@ -1,0 +1,119 @@
+---
+title: "Working with Tidy Data"
+author: "Preston Peck"
+date: "9/26/2021"
+output: html_document
+---
+
+# Load Libraries
+
+```{r}
+library(dplyr)
+library(stringr)
+library(readr)
+library(purrr)
+```
+
+# Import Data
+
+```{r}
+israeliVaccinations <- read.csv("data/israeli_vaccination_data_analysis_start.csv")
+israeliVaccinations
+```
+
+# Clean Data
+
+```{r}
+cleanedIsraeliVaccinations <- mutate_all(israeliVaccinations, function(x) {
+  y <- gsub( "\\n", " ", x)
+  gsub("\\s\\s+.*", "", y)
+})
+
+colNames <- c(
+  "Pop_#_Not_Vax", 
+  "Pop_%_Not_Vax", 
+  "Pop_#_Fully_Vax", 
+  "Pop_%_Fully_Vax", 
+  "Severe_Cases_per_100k_Not_Vax",
+  "Severe_Cases_per_100k_Fully_Vax"
+)
+
+ages <- israeliVaccinations$Age[str_detect(israeliVaccinations$Age, regex("[^\\s*]"))]
+
+popNumNotVaxByAge <- c(israeliVaccinations[2,2], israeliVaccinations[4,2])
+popPercentNotVaxByAge <- c(israeliVaccinations[3,2], israeliVaccinations[5,2])
+  
+popNumFullyVaxByAge <- c(israeliVaccinations[2,3], israeliVaccinations[4,3])
+popPercentFullyVaxByAge <- c(israeliVaccinations[3,3], israeliVaccinations[5,3])
+  
+severeCasesNotVaxByAge <- c(israeliVaccinations[2,4], israeliVaccinations[4,4])
+severeCasesFullyVaxByAge <-  c(israeliVaccinations[2,5], israeliVaccinations[4,5])
+  
+cleanedIsraeliVaccinations <- data.frame(
+  popNumNotVaxByAge,
+  popPercentNotVaxByAge,
+  popNumFullyVaxByAge,
+  popPercentFullyVaxByAge,
+  severeCasesNotVaxByAge,
+  severeCasesFullyVaxByAge,
+  row.names = ages
+)
+
+colnames(cleanedIsraeliVaccinations) <- colNames
+cleanedIsraeliVaccinations
+```
+
+# Analyze Data
+### Do you have enough information to calculate the total population?  What does this total population represent?
+
+Yes, assuming the populations are accurately being compared to the overall population, then we can work backwards from the given percentages and add both groups together since they collectively account for people of all ages (<50 + >50 = 0-infinity)
+
+```{r}
+cleanedIsraeliVaccinations <- mutate_all(cleanedIsraeliVaccinations, function(x) {
+  y <- gsub( "%", "", x)
+  z <- gsub(",", "", y)
+  as.numeric(z)
+})
+
+cleanedIsraeliVaccinations
+numUnder50Accounted <- cleanedIsraeliVaccinations[1,1] + cleanedIsraeliVaccinations[1,3]
+numOver50Accounted <- cleanedIsraeliVaccinations[2,1] + cleanedIsraeliVaccinations[2,3]
+numAccounted <- numUnder50Accounted + numOver50Accounted
+numAccounted
+
+percentageUnder50Accounted <- cleanedIsraeliVaccinations[1,2] + cleanedIsraeliVaccinations[1,4]
+percentageOver50Accounted <- cleanedIsraeliVaccinations[2,2] + cleanedIsraeliVaccinations[2,4]
+percentageUnder50Accounted
+percentageOver50Accounted
+
+popPer.1Percent <- cleanedIsraeliVaccinations[1,3] / (cleanedIsraeliVaccinations[1,4] * 10)
+popPer.1Percent
+
+percentageUnder50Missing <- (100 - percentageUnder50Accounted)
+percentageOver50Missing <- (100 - percentageOver50Accounted)
+numUnder50Missing <- percentageUnder50Missing * popPer.1Percent
+numOver50Missing <- percentageOver50Missing * popPer.1Percent
+
+numUnder50Total <- numUnder50Accounted + numUnder50Missing
+numOver50Total <- numOver50Accounted + numOver50Missing
+total <- numUnder50Total + numOver50Total
+total
+```
+
+### Calculate the Efficacy vs. Disease; Explain your results.
+
+The resulting rate is the rate of change in the number of hospitalization per age group from before the vaccination to after receiving the full vaccination
+
+```{r}
+cleanedIsraeliVaccinations <- cleanedIsraeliVaccinations %>% 
+  rowwise() %>%
+  mutate(Efficacy_vs._Severe_Disease = 1 - (Severe_Cases_per_100k_Fully_Vax / Severe_Cases_per_100k_Not_Vax)) %>%
+  data.frame
+
+efficacyRates <- cleanedIsraeliVaccinations$Efficacy_vs._Severe_Disease
+efficacyRates
+```
+
+### From your calculation of efficacy vs. disease, are you able to compare the rate of severe cases in unvaccinated individuals to that in vaccinated individuals?
+
+From the efficacy rates, the vaccines are most effective in populations who are younger than 50, which is to say the number of hospitalization per 100k people went down in those who are fully vaccinated. In populations older than 50, the calculations would indicate the vaccine has adverse effects since hospitalizations per 100k people increased with full vaccination, though there are no doubt many other untracked factors at play in this study.
