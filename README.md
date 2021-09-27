@@ -13,5 +13,5 @@ Please note any apparent discrepancies that you observe in your analysis.
 3. Perform analysis as described in the spreadsheet and above.
 4. Your code should be in an R Markdown file, posted to rpubs.com, and should include narrative
 descriptions of your data cleanup work, analysis, and conclusions. Please include in your homework submission:
-  - The URL to the .Rmd file in your GitHub repository.
-  - The URL for your rpubs.com web page.
+    - The URL to the .Rmd file in your GitHub repository.
+    - The URL for your rpubs.com web page.
