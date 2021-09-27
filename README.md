@@ -1,4 +1,5 @@
-# DATA-607-Assignment-5-Working-with-Tidy-Data
+# Assignment 5 - Working with Tidy Data
+
 The chart above describes August 2021 data for Israeli hospitalization (“Severe Cases”) rates for people under 50 (assume “50 and under”) and over 50, for both un-vaccinated and fully vaccinated populations. Analyze the data, and try to answer the questions posed in the spreadsheet. You’ll need some high level domain knowledge around:
 1. Israel’s total population
 2. Who is eligible to receive vaccinations
